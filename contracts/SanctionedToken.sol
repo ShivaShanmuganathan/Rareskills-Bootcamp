@@ -29,7 +29,7 @@ contract SanctionedToken is ERC1363 {
      * Add address to blacklist
      *
      */
-    function addToBlacklist(address user) public onlyAdmin {
+    function addToBlacklist(address user) external onlyAdmin {
         require(!blacklist[user], "User already blacklisted");
         blacklist[user] = true;
         emit UserBlacklisted(user);
@@ -38,14 +38,14 @@ contract SanctionedToken is ERC1363 {
     /**
      * Remove address from blacklist.
      */
-    function removeFromBlacklist(address user) public onlyAdmin {
+    function removeFromBlacklist(address user) external onlyAdmin {
         require(blacklist[user], "User not blacklisted");
         blacklist[user] = false;
         emit UserWhitelisted(user);
     }
 
     /**
-     * Checks the sanctioned status of any to/from address before any transfer.
+     * Checks blacklist before transfer
      */
     function _beforeTokenTransfer(
         address from,
