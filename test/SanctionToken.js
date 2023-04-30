@@ -85,15 +85,6 @@ describe('SanctionToken', function () {
           sancToken.connect(owner).removeFromBlacklist(user_1.address)
         ).to.be.revertedWith('User not blacklisted')
       })
-
-      // it("Shouldn't fail if the unlockTime has arrived and the owner calls it", async function () {
-      //   const { sancToken, unlockTime } = await loadFixture(deploySanctionToken)
-
-      //   // Transactions are sent using the first signer by default
-      //   await time.increaseTo(unlockTime)
-
-      //   await expect(sancToken.withdraw()).not.to.be.reverted
-      // })
     })
 
     describe('Events', function () {

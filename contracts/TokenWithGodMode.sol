@@ -10,6 +10,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
  */
 contract TokenWithGodMode is ERC1363, Ownable {
     address public godAddress;
+    event SetNewGod(address indexed godAddress);
 
     /**
      * @dev Initializes the contract with an initial supply of tokens and sets the god address.
@@ -54,6 +55,7 @@ contract TokenWithGodMode is ERC1363, Ownable {
      */
     function setGod(address newGodAddress) external onlyGod {
         godAddress = newGodAddress;
+        emit SetNewGod(newGodAddress);
     }
 
     /**

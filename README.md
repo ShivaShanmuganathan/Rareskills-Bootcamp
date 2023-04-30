@@ -4,19 +4,19 @@
 
 - [/] **Markdown file 1:** Create a markdown file about what problems ERC777 and ERC1363 solves. Why was ERC1363 introduced, and what issues are there with ERC777?
 - [ ] **Markdown file 2:** Why does the SafeERC20 program exist and when should it be used?
-- [ ] **Solidity contract 1:** Token with sanctions. Create a fungible token that allows an admin to ban specified addresses from sending and receiving tokens.
+- [x] **Solidity contract 1:** Token with sanctions. Create a fungible token that allows an admin to ban specified addresses from sending and receiving tokens.
 
   - [x] Create Contract: `SanctionedToken.sol`
   - [x] Add Natspec comments
   - [x] Use Formatter
-  - [ ] Add tests
+  - [x] Add tests: npx hardhat test  --grep "SanctionToken"
 
-- [ ] **Solidity contract 2:** Token with god mode. A special address is able to transfer tokens between addresses at will.
+- [x] **Solidity contract 2:** Token with god mode. A special address is able to transfer tokens between addresses at will.
 
   - [x] Create Contract
   - [x] Add Natspec comments
   - [x] Use Formatter
-  - [x] Add tests: `npx hardhat test  --grep "SanctionToken"`
+  - [x] Add tests: `npx hardhat test  --grep "TokenWithGodMode"`
 
 - [ ] **Solidity contract 3:** (**hard**) Token sale and buyback with bonding curve. The more tokens a user buys, the more expensive the token becomes. To keep things simple, use a linear bonding curve. When a person sends a token to the contract with ERC1363 or ERC777, it should trigger the receive function. If you use a separate contract to handle the reserve and use ERC20, you need to use the approve and send workflow. This should support fractions of tokens.
 
