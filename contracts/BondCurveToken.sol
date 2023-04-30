@@ -3,16 +3,17 @@ pragma solidity 0.8.19;
 
 import {ERC1363} from "erc-payable-token/contracts/token/ERC1363/ERC1363.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
+import "@openzeppelin/contracts/utils/Context.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
 /// @title BondCurveToken
 /// @author Shiva
 /// @notice This contract implements a linear bonding curve
 /// @dev Please refrain from using this contract on mainnet without proper testing and auditing
-contract BondCurveToken is ERC1363, Ownable {
+contract BondCurveToken is Context, Ownable, ERC1363 {
     uint256 public constant priceSlope = 0.1 gwei;
     uint256 public constant basePrice = 0.01 ether;
-    uint public maxSupply;
+    uint256 public maxSupply;
     mapping(address => uint) public depositTime;
 
     constructor(
@@ -32,9 +33,9 @@ contract BondCurveToken is ERC1363, Ownable {
             "msg.value is not equal to price"
         );
         /// @dev Require the user to not have an existing deposit
-        require(depositTime[msg.sender] == 0, "User already has a deposit");
-        depositTime[msg.sender] = block.timestamp;
-        _mint(msg.sender, amount);
+        require(depositTime[_msgSender()] == 0, "User already has a deposit");
+        depositTime[_msgSender()] = block.timestamp;
+        _mint(_msgSender(), amount);
     }
 
     /**
@@ -52,13 +53,13 @@ contract BondCurveToken is ERC1363, Ownable {
         bytes memory data
     ) external returns (bytes4) {
         /// @dev Require the user to have an existing deposit
-        require(depositTime[msg.sender] > 0, "User does not have a deposit");
+        require(depositTime[from] > 0, "User does not have a deposit");
         /// @dev Require the user to have waited for at least 10 minutes since their deposit time
         require(
-            (depositTime[msg.sender] + 10 minutes) < block.timestamp,
+            (depositTime[from] + 10 minutes) < block.timestamp,
             "Please wait for 10 minutes since your deposit time."
         );
-        depositTime[msg.sender] = 0;
+        depositTime[from] = 0;
         uint256 sellPrice = getSellPrice(value);
         _burn(address(this), value);
         payable(from).transfer(sellPrice);
@@ -110,11 +111,10 @@ contract BondCurveToken is ERC1363, Ownable {
     /**
      * @notice Burns a specific amount of tokens from the target address.
      * @dev The caller must be the owner of the contract.
-     * @param to The address from which to burn the tokens.
      * @param amount The amount of tokens to burn.
      */
-    function burn(address to, uint256 amount) public onlyOwner {
-        _burn(to, amount);
+    function burn(uint256 amount) external {
+        _burn(_msgSender(), amount);
     }
 
     /**

@@ -18,7 +18,7 @@
   - [x] Use Formatter
   - [x] Add tests: `npx hardhat test  --grep "TokenWithGodMode"`
 
-- [ ] **Solidity contract 3:** (**hard**) Token sale and buyback with bonding curve. The more tokens a user buys, the more expensive the token becomes. To keep things simple, use a linear bonding curve. When a person sends a token to the contract with ERC1363 or ERC777, it should trigger the receive function. If you use a separate contract to handle the reserve and use ERC20, you need to use the approve and send workflow. This should support fractions of tokens.
+- [x] **Solidity contract 3:** (**hard**) Token sale and buyback with bonding curve. The more tokens a user buys, the more expensive the token becomes. To keep things simple, use a linear bonding curve. When a person sends a token to the contract with ERC1363 or ERC777, it should trigger the receive function. If you use a separate contract to handle the reserve and use ERC20, you need to use the approve and send workflow. This should support fractions of tokens.
 
   - [x] Create Contract
     - [x] Figure out formula
@@ -29,7 +29,7 @@
     - [x] We have intentionally omitted other resources for bonding curves, we encourage you to find them on your own.
   - [x] Add Natspec comments
   - [x] Use Formatter
-  - [ ] Add tests
+  - [x] Add tests
   
 
 - [ ] **Solidity contract 4: (hard)** Untrusted escrow. Create a contract where a buyer can put an **arbitrary** ERC20 token into a contract and a seller can withdraw it 3 days later. Based on your readings above, what issues do you need to defend against? Create the safest version of this that you can while guarding against issues that you cannot control.
