@@ -2,8 +2,9 @@
 pragma solidity 0.8.19;
 
 import {ERC1363, ERC20} from "erc-payable-token/contracts/token/ERC1363/ERC1363.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract TokenWithGodMode is ERC1363 {
+contract TokenWithGodMode is ERC1363, Ownable {
     address public godAddress;
 
     constructor(
@@ -31,5 +32,10 @@ contract TokenWithGodMode is ERC1363 {
 
     function setGod(address newGodAddress) external onlyGod {
         godAddress = newGodAddress;
+    }
+
+    /// @dev See {ERC20-_mint}
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
     }
 }

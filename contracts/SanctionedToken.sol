@@ -2,8 +2,9 @@
 pragma solidity 0.8.19;
 
 import {ERC1363, ERC20} from "erc-payable-token/contracts/token/ERC1363/ERC1363.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract SanctionedToken is ERC1363 {
+contract SanctionedToken is ERC1363, Ownable {
     mapping(address => bool) public blacklist;
     address public immutable admin;
 
@@ -53,5 +54,10 @@ contract SanctionedToken is ERC1363 {
         uint256
     ) internal view override {
         require(!blacklist[from] && !blacklist[to], "User is blacklisted");
+    }
+
+    /// @dev See {ERC20-_mint}
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
     }
 }
