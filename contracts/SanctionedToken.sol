@@ -4,6 +4,10 @@ pragma solidity 0.8.19;
 import {ERC1363, ERC20} from "erc-payable-token/contracts/token/ERC1363/ERC1363.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
+/**
+ * @title SanctionedToken
+ * @dev ERC20 token contract that allows blacklisting of specific addresses
+ */
 contract SanctionedToken is ERC1363, Ownable {
     mapping(address => bool) public blacklist;
     address public immutable admin;
@@ -11,6 +15,12 @@ contract SanctionedToken is ERC1363, Ownable {
     event UserBlacklisted(address indexed user);
     event UserWhitelisted(address indexed wallet);
 
+    /**
+     * @dev Initializes the contract with a given name, symbol, and initial supply.
+     * @param _name The name of the token.
+     * @param _symbol The symbol of the token.
+     * @param _initialSupply The initial supply of the token.
+     */
     constructor(
         string memory _name,
         string memory _symbol,
@@ -21,14 +31,18 @@ contract SanctionedToken is ERC1363, Ownable {
         admin = msg.sender;
     }
 
+    /**
+     * @dev Modifier that only allows the admin to call a function.
+     */
     modifier onlyAdmin() {
         require(msg.sender == admin, "Only admin can call this function");
         _;
     }
 
     /**
-     * Add address to blacklist
-     *
+     * @notice Adds an address to the blacklist.
+     * @dev Only accesssible by Admin
+     * @param user The address to add to the blacklist.
      */
     function addToBlacklist(address user) external onlyAdmin {
         require(!blacklist[user], "User already blacklisted");
@@ -37,7 +51,9 @@ contract SanctionedToken is ERC1363, Ownable {
     }
 
     /**
-     * Remove address from blacklist.
+     * @notice Removes an address from the blacklist.
+     * @dev Only accesssible by Admin
+     * @param user The address to remove from the blacklist.
      */
     function removeFromBlacklist(address user) external onlyAdmin {
         require(blacklist[user], "User not blacklisted");
@@ -46,7 +62,9 @@ contract SanctionedToken is ERC1363, Ownable {
     }
 
     /**
-     * Checks blacklist before transfer
+     * @dev Checks if either the sender or the recipient is blacklisted
+     * @param from Address of the sender.
+     * @param to Address of the recipient.
      */
     function _beforeTokenTransfer(
         address from,
@@ -56,8 +74,13 @@ contract SanctionedToken is ERC1363, Ownable {
         require(!blacklist[from] && !blacklist[to], "User is blacklisted");
     }
 
-    /// @dev See {ERC20-_mint}
-    function mint(address to, uint256 amount) public onlyOwner {
+    /**
+     * @notice Mints tokens and assigns them to the specified address.
+     * @dev Only accesssible by Owner
+     * @param to The address to assign the minted tokens to.
+     * @param amount The amount of tokens to mint.
+     */
+    function mint(address to, uint256 amount) external onlyOwner {
         _mint(to, amount);
     }
 }
