@@ -4,13 +4,13 @@ pragma solidity 0.8.19;
 import {ERC1363} from "erc-payable-token/contracts/token/ERC1363/ERC1363.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/ERC20Capped.sol";
 import "@openzeppelin/contracts/utils/Context.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /// @title BondCurveToken
 /// @author Shiva
 /// @notice This contract implements a linear bonding curve
 /// @dev Please refrain from using this contract on mainnet without proper testing and auditing
-contract BondCurveToken is Context, Ownable, ERC1363 {
+contract BondCurveToken is Context, Ownable2Step, ERC1363 {
     uint256 public constant priceSlope = 0.1 gwei;
     uint256 public constant basePrice = 0.01 ether;
     uint256 public maxSupply;

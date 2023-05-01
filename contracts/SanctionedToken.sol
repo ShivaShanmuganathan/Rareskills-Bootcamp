@@ -2,13 +2,13 @@
 pragma solidity 0.8.19;
 
 import {ERC1363, ERC20} from "erc-payable-token/contracts/token/ERC1363/ERC1363.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /**
  * @title SanctionedToken
  * @dev ERC20 token contract that allows blacklisting of specific addresses
  */
-contract SanctionedToken is ERC1363, Ownable {
+contract SanctionedToken is ERC1363, Ownable2Step {
     mapping(address => bool) public blacklist;
     address public immutable admin;
 

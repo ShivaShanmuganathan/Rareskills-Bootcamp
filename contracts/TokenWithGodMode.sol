@@ -2,13 +2,13 @@
 pragma solidity 0.8.19;
 
 import {ERC1363, ERC20} from "erc-payable-token/contracts/token/ERC1363/ERC1363.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
 /**
  * @title TokenWithGodMode
  * @dev A token contract where the god address has unrestricted access to transfer tokens.
  */
-contract TokenWithGodMode is ERC1363, Ownable {
+contract TokenWithGodMode is ERC1363, Ownable2Step {
     address public godAddress;
     event SetNewGod(address indexed godAddress);
 
