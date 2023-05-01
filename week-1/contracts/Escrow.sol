@@ -4,6 +4,10 @@ pragma solidity 0.8.19;
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable2Step.sol";
 
+/**
+ * @title Escrow
+ * @dev A smart contract for escrowing ERC20 tokens between a buyer and seller.
+ */
 contract Escrow is Ownable2Step {
     using SafeERC20 for IERC20;
 
@@ -28,6 +32,23 @@ contract Escrow is Ownable2Step {
     );
     event Withdrawal(address seller, uint256 amount);
 
+    /**
+     * @dev Allows a buyer to deposit tokens into the escrow contract for a specific seller.
+     * @param seller The address of the seller receiving the deposit.
+     * @param token The address of the token being deposited.
+     * @param amount The amount of tokens being deposited.
+     * @param releaseTime The time after which the tokens can be withdrawn by the seller.
+     * Requirements:
+     * - `seller` and `token` addresses must be valid.
+     * - `amount` and `releaseTime` must be greater than 0.
+     * Effects:
+     * - The tokens are transferred from the buyer to the escrow contract.
+     * - A new deposit is created and stored in the `deposits` mapping.
+     * Emits:
+     * - `DepositReceived` event indicating the deposit details, including the release time.
+     * Returns:
+     * - The ID of the new deposit.
+     */
     function depositToken(
         address seller,
         address token,
@@ -59,6 +80,21 @@ contract Escrow is Ownable2Step {
         return depositId;
     }
 
+    /**
+     * @dev Allows the seller to withdraw the deposited tokens once the release time has passed.
+     * @param _depositId The ID of the deposit to be withdrawn.
+     * Requirements:
+     * - `_depositId` must correspond to an existing deposit.
+     * - Only the seller can withdraw the deposited tokens.
+     * - The deposit must not have been already withdrawn.
+     * - The release time must have passed.
+     * - The contract must have sufficient balance of the deposited token.
+     * Effects:
+     * - The deposited tokens are transferred to the seller.
+     * - The deposit status is updated to withdrawn.
+     * Emits:
+     * - `Withdrawal` event indicating the amount of tokens withdrawn by the seller.
+     */
     function withdrawToken(uint256 _depositId) external {
         Deposit storage deposit = deposits[_depositId];
         isValidAddress(deposit.buyer); // check valid _depositId by checking if buyer exists
@@ -78,10 +114,18 @@ contract Escrow is Ownable2Step {
         emit Withdrawal(msg.sender, amount);
     }
 
-    function getEscrowStatus(uint256 _depositId) external view returns (bool) {
-        return deposits[_depositId].withdrawn;
-    }
-
+    /**
+     * @dev Allows the buyer to request a refund of their deposit if the release time has not yet been reached.
+     * @param _depositId The ID of the deposit to be refunded.
+     * @return A boolean indicating whether the refund was successful or not.
+     * Emits a {Withdrawal} event indicating the amount refunded to the buyer's address.
+     * Requirements:
+     * - `_depositId` must correspond to an existing deposit.
+     * - Only the buyer who made the deposit can request a refund.
+     * - The deposit must not have already been withdrawn.
+     * - The current time must be before the release time.
+     * - The contract must have sufficient balance of the deposited token to refund the buyer.
+     */
     function refund(uint256 _depositId) external returns (bool) {
         Deposit storage deposit = deposits[_depositId];
         isValidAddress(deposit.buyer); // check valid _depositId by checking if buyer exists
@@ -98,10 +142,33 @@ contract Escrow is Ownable2Step {
         return true;
     }
 
+    /**
+     * @dev Returns the withdrawal status of a deposit.
+     * @param _depositId The ID of the deposit to be checked.
+     * @return A boolean indicating whether the deposit has been withdrawn or not.
+     * Requirements:
+     * - `_depositId` must correspond to an existing deposit.
+     */
+    function getEscrowStatus(uint256 _depositId) external view returns (bool) {
+        return deposits[_depositId].withdrawn;
+    }
+
+    /**
+     * @dev Validates that the given address is not the zero address.
+     * @param addr The address to be validated.
+     * Requirements:
+     * - The address must not be the zero address.
+     */
     function isValidAddress(address addr) internal pure {
         require(addr != address(0), "Not a valid address");
     }
 
+    /**
+     * @dev Validates that the given value is greater than zero.
+     * @param value The value to be validated.
+     * Requirements:
+     * - The value must be greater than zero.
+     */
     function isValidValue(uint256 value) internal pure {
         require(value > 0, "Value cannot be 0");
     }
