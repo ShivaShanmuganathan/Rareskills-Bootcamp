@@ -2,8 +2,8 @@
 
 ## Week 1
 
-- [/] **Markdown file 1:** Create a markdown file about what problems ERC777 and ERC1363 solves. Why was ERC1363 introduced, and what issues are there with ERC777?
-- [ ] **Markdown file 2:** Why does the SafeERC20 program exist and when should it be used?
+- [x] **Markdown file 1:** Create a markdown file about what problems ERC777 and ERC1363 solves. Why was ERC1363 introduced, and what issues are there with ERC777?
+- [x] **Markdown file 2:** Why does the SafeERC20 program exist and when should it be used?
 - [x] **Solidity contract 1:** Token with sanctions. Create a fungible token that allows an admin to ban specified addresses from sending and receiving tokens.
 
   - [x] Create Contract: `SanctionedToken.sol`
