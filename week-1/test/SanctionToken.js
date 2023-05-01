@@ -71,7 +71,7 @@ describe('SanctionToken', function () {
         const { sancToken, owner, user_1 } = await loadFixture(
           deploySanctionToken
         )
-        sancToken.connect(owner).addToBlacklist(user_1.address)
+        await sancToken.connect(owner).addToBlacklist(user_1.address)
         await expect(
           sancToken.connect(owner).addToBlacklist(user_1.address)
         ).to.be.revertedWith('User already blacklisted')

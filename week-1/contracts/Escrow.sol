@@ -10,7 +10,8 @@ import "@openzeppelin/contracts/access/Ownable2Step.sol";
  */
 contract Escrow is Ownable2Step {
     using SafeERC20 for IERC20;
-
+    // add whitelist for ERC20 Tokens by owner
+    mapping(address => bool) public whitelist;
     struct Deposit {
         address buyer;
         address seller;
@@ -24,13 +25,16 @@ contract Escrow is Ownable2Step {
     uint256 public depositId;
 
     event DepositReceived(
+        uint256 depositId,
         address indexed buyer,
         address indexed seller,
         address indexed token,
         uint256 amount,
         uint256 releaseTime
     );
-    event Withdrawal(address seller, uint256 amount);
+    event Withdrawal(uint256 depositId, address indexed seller, uint256 amount);
+    event TokenWhitelisted(address indexed token);
+    event TokenBlacklisted(address indexed token);
 
     /**
      * @dev Allows a buyer to deposit tokens into the escrow contract for a specific seller.
@@ -41,6 +45,7 @@ contract Escrow is Ownable2Step {
      * Requirements:
      * - `seller` and `token` addresses must be valid.
      * - `amount` and `releaseTime` must be greater than 0.
+     * - `token` must be whitelisted.
      * Effects:
      * - The tokens are transferred from the buyer to the escrow contract.
      * - A new deposit is created and stored in the `deposits` mapping.
@@ -60,6 +65,7 @@ contract Escrow is Ownable2Step {
         isValidAddress(token);
         isValidValue(amount);
         isValidValue(releaseTime);
+        require(whitelist[token], "Token is not whitelisted");
         IERC20(token).safeTransferFrom(msg.sender, address(this), amount);
         depositId += 1;
         deposits[depositId] = Deposit({
@@ -71,6 +77,7 @@ contract Escrow is Ownable2Step {
             withdrawn: false
         });
         emit DepositReceived(
+            depositId,
             msg.sender,
             seller,
             token,
@@ -111,7 +118,7 @@ contract Escrow is Ownable2Step {
         uint256 amount = deposit.amount;
         require(balance >= amount, "Insufficient balance");
         token.safeTransfer(msg.sender, amount);
-        emit Withdrawal(msg.sender, amount);
+        emit Withdrawal(_depositId, msg.sender, amount);
     }
 
     /**
@@ -126,7 +133,7 @@ contract Escrow is Ownable2Step {
      * - The current time must be before the release time.
      * - The contract must have sufficient balance of the deposited token to refund the buyer.
      */
-    function refund(uint256 _depositId) external returns (bool) {
+    function refundToken(uint256 _depositId) external returns (bool) {
         Deposit storage deposit = deposits[_depositId];
         isValidAddress(deposit.buyer); // check valid _depositId by checking if buyer exists
         require(msg.sender == deposit.buyer, "Only buyer can refund");
@@ -138,8 +145,36 @@ contract Escrow is Ownable2Step {
         uint256 amount = deposit.amount;
         require(balance >= amount, "Insufficient balance");
         token.safeTransfer(msg.sender, amount);
-        emit Withdrawal(msg.sender, amount);
+        emit Withdrawal(_depositId, msg.sender, amount);
         return true;
+    }
+
+    /**
+     * @dev Adds a token to the whitelist.
+     * @param token The address of the token to be added.
+     * Requirements:
+     * - The `token` address must be a valid Ethereum address.
+     * - The `token` must not already be whitelisted.
+     */
+    function addTokenToWhitelist(address token) external onlyOwner {
+        isValidAddress(token);
+        require(!whitelist[token], "Token is already whitelisted");
+        whitelist[token] = true;
+        emit TokenWhitelisted(token);
+    }
+
+    /**
+     * @dev Removes a token from the whitelist.
+     * @param token The address of the token to be removed.
+     * Requirements:
+     * - The `token` address must be a valid Ethereum address.
+     * - The `token` must be currently whitelisted.
+     */
+    function removeTokenFromWhitelist(address token) external onlyOwner {
+        isValidAddress(token);
+        require(whitelist[token], "Token is not whitelisted");
+        whitelist[token] = false;
+        emit TokenBlacklisted(token);
     }
 
     /**

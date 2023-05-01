@@ -13,7 +13,7 @@ contract SanctionedToken is ERC1363, Ownable2Step {
     address public immutable admin;
 
     event UserBlacklisted(address indexed user);
-    event UserWhitelisted(address indexed wallet);
+    event UserWhitelisted(address indexed user);
 
     /**
      * @dev Initializes the contract with a given name, symbol, and initial supply.
