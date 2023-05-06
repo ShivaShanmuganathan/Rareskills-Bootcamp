@@ -1,6 +1,4 @@
-# Rareskills-Bootcamp
-
-## Week 1
+# Week 1: ERC1363 Tokens and Bonding Curves
 
 - [x] **Markdown file 1:** Create a markdown file about what problems ERC777 and ERC1363 solves. Why was ERC1363 introduced, and what issues are there with ERC777?
 - [x] **Markdown file 2:** Why does the SafeERC20 program exist and when should it be used?
