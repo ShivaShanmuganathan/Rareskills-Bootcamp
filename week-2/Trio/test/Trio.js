@@ -373,7 +373,7 @@ describe('Trio', function () {
     })
 
     describe('Stake Rewards', function () {
-      it('Should stake the nft, wait for some time, claim rewards and withdraw nft', async function () {
+      it('Should mint nft, stake it, wait for some time, claim rewards', async function () {
         const {
           rewardToken,
           nft,
@@ -425,6 +425,106 @@ describe('Trio', function () {
           .withArgs(user1.address, token_id, anyValue)
         const user_balance_after_2 = await rewardToken.balanceOf(user1.address)
         expect(user_balance_after_2).to.be.greaterThanOrEqual(stakingRewards2)
+      })
+
+      it('Should mint nft using merkle proof, stake it, wait for some time, claim rewards', async function () {
+        const {
+          rewardToken,
+          nft,
+          stakeAndEarn,
+          user1,
+          merkle_tree,
+          TENTH_ETHER,
+          ONE_DAY_IN_SECS
+        } = await loadFixture(deployTrio)
+
+        const user1_params = getProofsAndTickets(merkle_tree, user1.address)
+        const token_id = await nft.tokenId()
+        await expect(
+          nft
+            .connect(user1)
+            .verifyAndMint(user1_params.tickets[0], user1_params.proofs[0], {
+              value: TENTH_ETHER
+            })
+        )
+          .to.emit(nft, 'Transfer')
+          .withArgs(ethers.constants.AddressZero, user1.address, token_id)
+
+        await expect(
+          nft
+            .connect(user1)
+            ['safeTransferFrom(address,address,uint256)'](
+              user1.address,
+              stakeAndEarn.address,
+              token_id
+            )
+        )
+          .to.emit(stakeAndEarn, 'NFTDeposited')
+          .withArgs(user1.address, user1.address, token_id, anyValue)
+
+        const oneDayLater = (await time.latest()) + ONE_DAY_IN_SECS
+        // We can increase the time in Hardhat Network
+        await time.increaseTo(oneDayLater)
+
+        const stakingRewards = await stakeAndEarn.calculateStakingRewards(
+          token_id
+        )
+
+        await expect(stakeAndEarn.connect(user1).claimRewards(token_id))
+          .to.emit(stakeAndEarn, 'RewardsClaimed')
+          .withArgs(user1.address, token_id, anyValue)
+        const user_balance_after = await rewardToken.balanceOf(user1.address)
+        expect(user_balance_after).to.be.greaterThanOrEqual(stakingRewards)
+
+        const twoDaysLater =
+          (await time.latest()) + ONE_DAY_IN_SECS + ONE_DAY_IN_SECS
+        await time.increaseTo(twoDaysLater)
+
+        const stakingRewards2 = await stakeAndEarn.calculateStakingRewards(
+          token_id
+        )
+
+        await expect(stakeAndEarn.connect(user1).claimRewards(token_id))
+          .to.emit(stakeAndEarn, 'RewardsClaimed')
+          .withArgs(user1.address, token_id, anyValue)
+        const user_balance_after_2 = await rewardToken.balanceOf(user1.address)
+        expect(user_balance_after_2).to.be.greaterThanOrEqual(stakingRewards2)
+      })
+
+      it('Should mint nft using merkle proof, stake it, wait for some time, withdraw with rewards', async function () {
+        const {
+          rewardToken,
+          nft,
+          stakeAndEarn,
+          user1,
+          merkle_tree,
+          TENTH_ETHER,
+          ONE_DAY_IN_SECS
+        } = await loadFixture(deployTrio)
+
+        const user1_params = getProofsAndTickets(merkle_tree, user1.address)
+        const token_id = await nft.tokenId()
+        await expect(
+          nft
+            .connect(user1)
+            .verifyAndMint(user1_params.tickets[0], user1_params.proofs[0], {
+              value: TENTH_ETHER
+            })
+        )
+          .to.emit(nft, 'Transfer')
+          .withArgs(ethers.constants.AddressZero, user1.address, token_id)
+
+        await expect(
+          nft
+            .connect(user1)
+            ['safeTransferFrom(address,address,uint256)'](
+              user1.address,
+              stakeAndEarn.address,
+              token_id
+            )
+        )
+          .to.emit(stakeAndEarn, 'NFTDeposited')
+          .withArgs(user1.address, user1.address, token_id, anyValue)
 
         const fiveDaysLater =
           (await time.latest()) +
