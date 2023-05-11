@@ -1,11 +1,11 @@
 # Practice
 
-- [ ]  **Markdown file 1:** Answer these questions
-    - [ ]  How does ERC721A save gas?
-    - [ ]  Where does it add cost?
-    - [ ]  Why shouldn’t ERC721A enumerable’s implementation be used on-chain?
-- [ ]  **Markdown file 2:** Besides the examples listed in the code and the reading, what might the wrapped NFT pattern be used for?
-- [ ]  **Markdown file 3:** Revisit the solidity events tutorial. How can OpenSea quickly determine which NFTs an address owns if most NFTs don’t use ERC721 enumerable? Explain how you would accomplish this if you were creating an NFT marketplace
+- [x]  **Markdown file 1:** Answer these questions
+    - [x]  How does ERC721A save gas?
+    - [x]  Where does it add cost?
+    - [x]  Why shouldn’t ERC721A enumerable’s implementation be used on-chain?
+- [x]  **Markdown file 2:** Besides the examples listed in the code and the reading, what might the wrapped NFT pattern be used for?
+- [x]  **Markdown file 3:** Revisit the solidity events tutorial. How can OpenSea quickly determine which NFTs an address owns if most NFTs don’t use ERC721 enumerable? Explain how you would accomplish this if you were creating an NFT marketplace
 - [x]  **Smart contract ecosystem 1:** Smart contract trio: NFT with merkle tree discount, ERC20 token, staking contract
     - [x]  Create an ERC721 NFT with a supply of 20.
     - [x]  Include ERC 2918 royalty in your contract to have a reward rate of 2.5% for any NFT in the collection. Use the openzeppelin implementation.
