@@ -119,7 +119,7 @@ describe('PrimeCounter', function () {
     })
 
     describe('Events', function () {
-      it('Should emit an event on mient', async function () {
+      it('Should emit an event on mint', async function () {
         supply = 20
         const { nft, user1, owner, TENTH_ETHER } = await loadFixture(
           deployNFTandPrime
