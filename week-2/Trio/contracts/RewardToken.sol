@@ -8,16 +8,27 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
  * @title RewardToken
  * @author Shiva
  * @notice This smart contract is a Reward Token
-
+ * @dev A ERC20 contract representing a reward token that can be minted only by a specific staking contract.
  */
 
 interface IRewardToken is IERC20 {
+    /**
+     * @dev Mint reward tokens to a specified address.
+     * @param to The address to mint tokens to.
+     * @param amount The amount of tokens to mint.
+     */
     function mint(address to, uint256 amount) external;
 }
 
 contract RewardToken is ERC20 {
     address public immutable stakeAndEarn;
 
+    /**
+     * @dev Create a new RewardToken contract.
+     * @param _name The name of the token.
+     * @param _symbol The symbol of the token.
+     * @param _stakeAndEarn The address of the staking contract that is allowed to mint tokens.
+     */
     constructor(
         string memory _name,
         string memory _symbol,
@@ -26,17 +37,21 @@ contract RewardToken is ERC20 {
         stakeAndEarn = _stakeAndEarn;
     }
 
-    /// @notice Burn tokens
-    /// @param from Address from which token will be burned
-    /// @param amount Amount of token to burn
+    /**
+     * @dev Burn tokens from a specified address.
+     * @param from The address to burn tokens from.
+     * @param amount The amount of tokens to burn.
+     */
     function burn(address from, uint256 amount) external {
         require(from == msg.sender, "from address must be sender");
         _burn(from, amount);
     }
 
-    /// @notice Only stakingContract is able to mint tokens
-    /// @param to Address to which token will be minted
-    /// @param amount Amount of token to mint
+    /**
+     * @dev Mint reward tokens to a specified address.
+     * @param to The address to mint tokens to.
+     * @param amount The amount of tokens to mint.
+     */
     function mint(address to, uint256 amount) external {
         require(
             msg.sender == stakeAndEarn,

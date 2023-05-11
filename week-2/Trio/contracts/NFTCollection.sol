@@ -5,28 +5,14 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {ERC2981} from "@openzeppelin/contracts/token/common/ERC2981.sol";
 import {MerkleProof} from "@openzeppelin/contracts/utils/cryptography/MerkleProof.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
-import {BitMaps} from "@openzeppelin/contracts/utils/structs/BitMaps.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-
-// use reverts instead of require
-// use EIP-712
-// use OZ BitMaps
 
 /**
  * @title NFTCollection
- *s @author Shiva
+ * @author Shiva
  * @notice This smart contract implements a smart contract trio: NFT with merkle tree discount, ERC20 token, staking contract.
  * @dev ERC721 NFTs are created with a supply of 20, and an ERC2918 royalty of 2.5% is included in the contract.
  */
-
-//
-//
-// A merkle tree is used to allow addresses to mint NFTs at a discount, and openzeppelin's implementation of a bitmap is used for this.
-// An ERC20 token is created to reward staking.
-// A third smart contract is created to mint new ERC20 tokens and receive ERC721 tokens for staking.
-// The staking mechanism follows the sequence described in the accompanying video.
-// The funds from the NFT sale in the contract can be withdrawn by the owner using Ownable2Step.
-// For more information, please visit [website] or see the accompanying documentation.
 
 contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
     uint256 public constant tokenPrice = 0.1 ether;
@@ -41,6 +27,13 @@ contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
 
     event EtherWithdrawn(address indexed owner, uint256 amount);
 
+    /**
+     * @dev Constructor for the NFTCollection contract.
+     * @param _name string Name of the token.
+     * @param _symbol string Symbol of the token.
+     * @param _merkleRoot Root of the merkle tree
+     * @param royaltyFee Default royalty fee to be set for this NFT contract
+     */
     constructor(
         string memory _name,
         string memory _symbol,
@@ -52,9 +45,9 @@ contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
     }
 
     /**
-     * @notice Mint NFT with price = tokenPrice
-     * @param _to address Address to which NFT will be minted
-     * @return tokenId to let user know
+     * @notice Mint NFT with tokenPrice
+     * @param _to The address to which NFT will be minted to
+     * @return tokenId minted for user
      */
     function mint(address _to) public payable nonReentrant returns (uint256) {
         require(msg.value >= tokenPrice, "Insufficient payment amount");
@@ -68,16 +61,21 @@ contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
     }
 
     /**
-     * @notice Mint NFT during presale. Valide presale ticketNumber is needed (whitelist)
-     * @dev Some assembly code has been used for gas optimization purposes
-     * @param ticketNumber uint256 Presale ticketNumber associated to _msgSender() address
-     * @param merkleProof bytes32[] Proof used to verify if _msgSender() can mint using presale ticketNumber
-     * @return tokenId to let user know
+     * @dev Verifies a ticket using a merkle proof and mints a new NFT for the caller.
+     * @param ticketNumber The number of the ticket to be verified.
+     * @param merkleProof The merkle proof used to verify the ticket ownership.
+     * @return The ID of the newly minted NFT.
+     * Requirements:
+     * - The caller must send sufficient payment to cover the discounted token price.
+     * - The ticket number must not have been used before.
+     * - The provided merkle proof must be valid.
+     * - The maximum token supply has not been reached.
      */
+
     function verifyAndMint(
         uint8 ticketNumber,
         bytes32[] calldata merkleProof
-    ) external payable returns (uint256) {
+    ) external payable nonReentrant returns (uint256) {
         require(
             msg.value >= discountedTokenPrice,
             "Insufficient payment amount"
@@ -107,6 +105,14 @@ contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
      * @param _tokenId uint256 ID of the token to which royalty will be changed
      * @param receiver address Address that will receive royalties on sell
      * @param feeNumerator uint96 Amount of royalty, this is divided by 10000 to get a percentage
+     */
+
+    /**
+     * @dev Sets the royalty receiver and fee for a given token.
+     * @param _tokenId The ID of the token to set the royalty for.
+     * @param receiver The address that should receive the royalty.
+     * @param feeNumerator The numerator of the royalty fee, as a fraction of the total sale price. The denominator is set to 10,000.
+     * @notice Only the owner or an approved address of the token can call this function.
      */
     function setTokenRoyalty(
         uint256 _tokenId,
@@ -139,11 +145,23 @@ contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
             "https://raw.githubusercontent.com/ShivaShanmuganathan/Rareskills-Bootcamp/tree/week-2/week-2/nft-collection/";
     }
 
+    /**
+     * @dev Withdraws the Ether balance from the contract and transfers it to the owner's address.
+     * @notice Only the contract owner can call this function.
+     */
     function withdrawEther() external onlyOwner {
         uint256 balance = address(this).balance;
         payable(owner()).transfer(balance);
         emit EtherWithdrawn(owner(), balance);
     }
+
+    /**
+     * @dev Checks if a given ticket can be claimed by a specific address using a provided Merkle proof.
+     * @param ticketNumber The ticket number to check.
+     * @param claimer The address of the claimer.
+     * @param merkleProof The Merkle proof used to verify the claim.
+     * @return A boolean indicating whether the ticket can be claimed or not.
+     */
 
     function canClaim(
         uint256 ticketNumber,
@@ -155,6 +173,13 @@ contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
             isValidProof(ticketNumber, claimer, merkleProof);
     }
 
+    /**
+     * @dev Checks if the provided `merkleProof` is valid for the given `ticketNumber` and `claimer`.
+     * @param ticketNumber The ticket number to be verified.
+     * @param claimer The address of the user claiming the ticket.
+     * @param merkleProof The merkle proof to be validated.
+     * @return A boolean indicating whether the provided `merkleProof` is valid or not.
+     */
     function isValidProof(
         uint256 ticketNumber,
         address claimer,
@@ -170,6 +195,14 @@ contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
             );
     }
 
+    /**
+     * @dev Checks whether the ticket with the given ticket number is available for purchase or not.
+     * @param ticketNumber The ticket number to check.
+     * @return A boolean indicating whether the ticket is available or not.
+     * Requirements:
+     * - Ticket number must be lesser than 20.
+     */
+
     function checkTicketStatus(
         uint256 ticketNumber
     ) internal view returns (bool) {
@@ -179,6 +212,10 @@ contract NFTCollection is Ownable2Step, ReentrancyGuard, ERC721, ERC2981 {
         return isTicketNumberAvailable == 1;
     }
 
+    /**
+     * @dev Allows the owner to set the merkle root for the event
+     * @param _merkleRoot The new merkle root value to be set
+     */
     function setMerkleRoot(bytes32 _merkleRoot) external onlyOwner {
         merkleRoot = _merkleRoot;
     }
