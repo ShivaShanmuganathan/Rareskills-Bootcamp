@@ -8,6 +8,13 @@
  *  The task is to write within the `MAIN` macro below, huff code that reverts if ether is sent with the transaction.
  */
 
-#define macro MAIN() = takes(0) returns(0) {
+// "NON_PAYABLE" Revert Message String
+#define constant NON_PAYABLE_ERROR = 0xb4e4f4e5f50415941424c45000000000000000000000000000000000000000000
+#define constant NON_PAYABLE_LENGTH = 0x0b
 
+#define macro MAIN() = takes(0) returns(0) {    
+    callvalue iszero do_not_throw jumpi // [msg.value == 0, 11 (length), "NON_PAYABLE"]
+    0x00 0x00 revert
+    do_not_throw:   // [message_length, message]
+        stop
 }

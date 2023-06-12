@@ -1,0 +1,65 @@
+
+/** 
+ *  SUM_ARRAY HUFF EXERCISE
+ *
+ *  
+ *  The task is to write within the `MAIN` macro below, write a functionality that takes an array of uint256 as an argument and returns the sum of all the numbers
+ *
+ *  NOTICE: The contract should revert when an unrecognized function is called
+ */
+
+ /*
+ dump of the log
+0x1e2aea060000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000106000000000000000000000000000000000000000000000000000000000000000800000000000000000000000000000000000000000000000000000000000000040000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000110000000000000000000000000000000000000000000000000000000004022e45000000000000000000000000000000000000000000000000000000000000001b
+ */
+
+#define function sumArray(uint256[]) payable returns(uint256)
+
+
+#define macro MAIN() = takes(0) returns(0) {
+
+    //get the length
+    //read certain number of values
+    //keep track of the sum of the values in memory
+    //use jumps to simulate the loop
+    //return the sum at the end
+
+    // Get the function signature from the calldata
+    0x00 calldataload        // [calldata @ 0x00]
+    0xE0 shr                 // [func_sig (calldata @ 0x00 >> 0xE0)]
+
+    // Check if the function signature in the calldata is
+    // a match to our function definition.
+    __FUNC_SIG(sumArray)
+    eq 
+    sumArrayJump jumpi
+
+    // Revert if no function signature matched
+    0x00 0x00 revert
+
+    sumArrayJump:
+        0x24 calldataload   //length
+        0x00    //running sum
+        0x24    //start reading arguments from this offset
+
+    topOfLoop:
+            dup3 iszero outOfLoop jumpi
+            0x20 add    //how much to increase offset by, essentially 1
+            swap1       //get the running total in front
+            dup2 calldataload   //load from offset and add
+            add
+
+            swap2   //decrease counter
+            0x01 swap1 sub
+            swap2   //setup for the next iteration
+            swap1
+            topOfLoop jump
+
+    outOfLoop:
+
+    pop
+    0x00 mstore
+    0x20 0x00 return
+
+
+}

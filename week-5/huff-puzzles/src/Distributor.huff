@@ -14,5 +14,41 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
-   
+   // Get the function selector
+    0x00 calldataload 0xe0 shr
+    __FUNC_SIG(distribute) eq distribute jumpi
+
+    revertJump:
+        0x00 0x00 revert
+
+    endJump:
+        0x01 0x00 mstore
+        0x20 0x00 return
+
+    distribute:
+        // 0x20 0x24 0x00 calldatacopy // number of arguments
+        // 0x00 mload dup1 iszero revertJump jumpi // nArgs
+
+        0x24 calldataload   // nArgs
+        dup1
+        callvalue           // [nArgs, nArgs, value]
+        div                 // divide callvalue by total addresses [nArgs, amount]
+        0x24                // get starting index of array      [nArgs, amount, offset]
+        
+        // [nArgs, amount, offset]
+        begin_loop:
+            dup3 iszero endJump jumpi       // check if nArgs is zero
+            0x20 add dup1                        // [nArgs, amount, offset, offset]
+            calldataload                    // [nArgs, amount, offset, address]
+            
+            // transfer
+            0x00 0x00 0x00 0x00 dup7 dup6 gas call  // [nArgs, amount, offset, address, result]
+            iszero revertJump jumpi         // revert if call fails
+
+            // [nArgs, amount, offset, address]
+            swap3 0x01 swap1 sub             // [address, amount, offset, nArgs-1] 
+            swap3                           // [nArgs-1, amount, offset, address]
+            pop                             // [nArgs-1, amount, offset]
+            begin_loop jump
+
  }

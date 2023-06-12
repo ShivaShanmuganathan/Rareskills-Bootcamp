@@ -1,3 +1,4 @@
+//  #include "./Console.huff"
 
 /** 
  *  SUM_ARRAY HUFF EXERCISE
@@ -12,5 +13,52 @@
 
 
 #define macro MAIN() = takes(0) returns(0) {
+    // LOG_CALLDATA(0x00, calldatasize, 0x00)
+    // Get the function selector
+    0x00
+    calldataload
+    0xE0
+    shr
+    
+    // Jump to the implementation of the ADD_ONE function if the calldata matches the function selector
+    __FUNC_SIG(sumArray) eq 
+    sumArray jumpi // Compare function selector to setValue(uint256)
+    
+    
+    0x00 0x00 revert
+
+    sumArray:
+        SUM_ARRAY()
 
 }
+
+
+
+
+#define macro SUM_ARRAY() = takes(0) returns(0) {
+    // [nArgs, val, idx]
+    sum_array:
+        0x24 calldataload dup1 iszero return_zero jumpi       // [nArgs]
+        0x00 0x24       // [nArgs, val, idx]
+        begin_loop:
+            0x20 add dup1 calldataload      // [nArgs, val, idx+32, new_val]
+            dup3 add swap2 pop                       // [nArgs, val, idx+32, new_val, val] -> [nArgs, val, idx+32, res] -> [nArgs, res, idx+32, val] -> [nArgs, res, idx+32]
+            swap2 0x01 swap1 sub dup1 iszero return_val jumpi     // [nArgs, res, idx+32] -> [idx+32, res, nArgs] -> [idx+32, res, nArgs-1]
+            swap2
+            begin_loop jump
+    
+    return_val:
+        RETURN_VAL()
+
+    return_zero:
+        0x00 0x00 mstore       // place the result in memory
+        0x20 0x00 return      // return the result
+}
+
+
+#define macro RETURN_VAL() = takes(0) returns(0) {
+    // [idx+32, res, nArgs-1]
+    swap1 0x00 mstore
+    0x20 0x00 return
+}
+

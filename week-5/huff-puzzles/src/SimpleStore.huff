@@ -11,10 +11,66 @@
  *  NOTICE: The contract should revert when an unrecognized function is called
  */
 
-#define function store(uint256) payable returns()
-#define function read() payable returns(uint256)
+// #define function store(uint256) payable returns()
+// #define function read() payable returns(uint256)
 
 
+// #define macro MAIN() = takes(0) returns(0) {
+    
+// }
+
+
+// Interface
+#define function store(uint256) nonpayable returns ()
+#define function read() nonpayable returns (uint256)
+
+// Storage
+#define constant VALUE = FREE_STORAGE_POINTER()
+
+// External function macros
+
+// store(uint256)
+#define macro STORE() = takes(0) returns(0) {
+    // Read uint256 from calldata, remember to read from byte 4 to allow for the function selector! 
+    0x04            // [0x04]
+    calldataload    // [value]
+
+    // Get pointer and store
+    [VALUE]         // [value_ptr, value]
+    sstore          // []
+}
+
+// read()
+#define macro READ() = takes(0) returns(0) {
+    // Read uint256 from storage
+    [VALUE]         // [value_ptr]
+    sload           // [value]
+
+    // Store the return value in memory
+    0x00            // [0x00, value]
+    mstore          // []
+
+    // Return the first 32 bytes of memory containing our uint256
+    0x20            // [0x20]
+    0x00            // [0x00, 0x20]
+    return          // []
+}
+
+// Main
 #define macro MAIN() = takes(0) returns(0) {
+    // Get the function selector
+    0x00 calldataload 0xe0 shr
+
+    dup1 __FUNC_SIG(store) eq store jumpi // Compare function selector to store(uint256)
+    dup1 __FUNC_SIG(read) eq read jumpi // Compare the function selector to read()
+    
+    0x00 0x00 revert
+
+    // dispatch
+    store:
+        STORE()
+    read:
+        READ()
+
     
 }

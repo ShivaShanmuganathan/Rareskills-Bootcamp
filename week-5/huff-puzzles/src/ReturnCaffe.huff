@@ -12,23 +12,14 @@
  #define function makeContract() payable returns(address)
 
 
+//  #define macro MAIN() = takes(0) returns(0) {
+    
+//  }
+
  #define macro MAIN() = takes(0) returns(0) {
     
-    0x00 calldataload 0xe0 shr
-    __FUNC_SIG(makeContract) eq makeContract jumpi
-
-    revertJump:
-    0x00 0x00 revert
-
-    makeContract:
-
-    // ReturnCaffe bytecode (init + runtime)
-    // huffc src/ReturnCaffe.huff --bytecode
-    // 0x600c8060093d393df3620caffe60005260206000f3
-    __RIGHTPAD(0x600c8060093d393df3620caffe60005260206000f3) 0x00 mstore
-
-    0x2a 0x00 0x00 create // address
-
+    0xcaffe
     0x00 mstore
+
     0x20 0x00 return
 }

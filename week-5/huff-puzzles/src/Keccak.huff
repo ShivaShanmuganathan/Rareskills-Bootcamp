@@ -9,5 +9,12 @@
 
 
  #define macro MAIN() = takes(0) returns(0) {
+   // calldatasize 0x00 0x24 calldatacopy // 0x2a sub 0x24 mstore 0x24 0x20 revert
+   // calldatasize 0x24 revert
+
+    calldatasize 0x00 0x00 calldatacopy
+    calldatasize 0x00 sha3
+    0x00 mstore
+    0x20 0x00 return
     
  }

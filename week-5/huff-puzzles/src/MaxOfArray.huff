@@ -7,8 +7,102 @@
  *  NOTICE: The contract should revert when an unrecognized function is called
  */
 
+// #define function maxOfArray(uint256[]) payable returns(uint256)
+
+// #define macro LEAVE_MAX() = takes(2) returns(1) {
+//     dup2 dup2
+//     lt noSwapJump jumpi
+//     swap1
+    
+//     noSwapJump:
+        
+//     pop
+// }
+
+// #define macro MAIN() = takes(0) returns(0) {
+//     0x00 calldataload 0xe0 shr
+//     __FUNC_SIG(maxOfArray) eq maxOfArray jumpi
+
+//     revertJump:
+//     0x00 0x00 revert
+
+//     maxOfArray:
+    
+//     0x24 calldataload // number of arguments
+//     dup1 iszero revertJump jumpi
+
+//     0x00              // nArgs, max
+//     0x24              // nArgs, max, offset
+//     start:
+//         dup3 iszero endJump jumpi
+//         0x20 add      // nArgs, max, offset
+//         swap1         // nArgs, offset, max
+//         dup2 calldataload
+        
+//         LEAVE_MAX()
+        
+//         // nArgs, offset, max
+//         swap2        // max, offset, nArgs
+//         0x01 swap1 sub     // max, offset, nArgs - 1
+//         swap2        // nArgs - 1, offset, max
+//         swap1
+//         start jump
+//     endJump:
+
+//     pop
+//     0x00 mstore
+//     0x20 0x00 return
+// }
+
+
+
+
+
+
 #define function maxOfArray(uint256[]) payable returns(uint256)
 
+#define macro LEAVE_MAX() = takes(2) returns(1) {
+    // max, val
+    dup2 dup2       // max, val, max, val
+    lt noSwapJump jumpi     // max, val, 1/0
+    swap1
+    
+    noSwapJump:
+    pop     // ans
+}
+
 #define macro MAIN() = takes(0) returns(0) {
-   
+    0x00 calldataload 0xe0 shr
+    __FUNC_SIG(maxOfArray) eq maxOfArray jumpi
+
+    revertJump:
+    0x00 0x00 revert
+
+    maxOfArray:
+    
+    0x20 0x24 0x00 calldatacopy // number of arguments
+    0x00 mload dup1 iszero revertJump jumpi
+
+    0x00              // nArgs, max
+    0x24              // nArgs, max, offset
+    start:
+        dup3 iszero endJump jumpi // check if nArgs is zero
+        0x20 add      // nArgs, max, offset + 32
+        dup2       // nArgs, max, offset, max
+        dup2 calldataload // nArgs, max, offset, max, offset -> nArgs, max, offset, max, val
+        
+        LEAVE_MAX()     // nArgs, max, offset, ans
+        
+        
+        swap2        // nArgs, ans, offset, max
+        pop         // nArgs, ans, offset
+        swap2       // offset, ans, nArgs
+        0x01 swap1 sub     // offset, ans, nArgs - 1
+        swap2        // nArgs - 1, ans, offset
+        start jump
+    endJump:
+
+    pop
+    0x00 mstore
+    0x20 0x00 return
 }

@@ -5,6 +5,8 @@ import "forge-std/Test.sol";
 import {HuffConfig} from "foundry-huff/HuffConfig.sol";
 import {HuffDeployer} from "foundry-huff/HuffDeployer.sol";
 
+import {console} from "forge-std/console.sol";
+
 interface Donations {
     function donated(address user) external view returns (uint256);
 }
@@ -19,7 +21,7 @@ contract DonationsTest is Test {
     function testDonations() public {
         // first party
         vm.deal(address(this), 1 ether);
-        (bool success, ) = address(donations).call{value: 0.5 ether}("");
+        (bool success, bytes memory data) = address(donations).call{value: 0.5 ether}("");
         require(success, "call failed");
         assertEq(
             donations.donated(address(this)),
@@ -61,3 +63,15 @@ contract DonationsTest is Test {
         );
     }
 }
+
+// runtime bytecode
+// 60003560e01c63fb690dcc1461002e5734151961001d575b60006000fd5b336000526020600020805434019055005b60043560005260206000205460005260206000f3
+
+// caller
+// 0xbe862ad9abfe6f22bcb087716c7d89a26051f74c
+
+// input calldata
+// 0xfb690dcc000000000000000000000000be862ad9abfe6f22bcb087716c7d89a26051f74c
+// 000000000000000000000000be862ad9abfe6f22bcb087716c7d89a26051f74c
+// be862ad9abfe6f22bcb087716c7d89a26051f74c
+// be862ad9abfe6f22bcb087716c7d89a26051f74c

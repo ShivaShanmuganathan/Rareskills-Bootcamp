@@ -32,11 +32,35 @@ contract SumArrayTest is Test, NonMatchingSelectorHelper {
 
         uint256 x = sumArray.sumArray(arr);
         assertEq(x, 67252106, "expected sum of arr to be 67252106");
+        
 
         uint256[] memory arr2 = new uint256[](0);
         uint256 x2 = sumArray.sumArray(arr2);
         assertEq(x2, 0, "expected empty array to return 0");
+        console.log("Reached Here");
+        
     }
+
+    // function testSumArray() external {
+    //     uint256[] memory arr = new uint256[](4);
+    //     arr[0] = 42;
+    //     arr[1] = 24;
+    //     arr[2] = 122;
+    //     arr[3] = 346;
+    //     // arr[4] = 4;
+    //     // arr[5] = 1;
+    //     // arr[6] = 0;
+    //     // arr[7] = 17;
+    //     // arr[8] = 67251781;
+    //     // arr[9] = 27;
+
+    //     uint256 x = sumArray.sumArray(arr);
+    //     assertEq(x, 534, "expected sum of arr to be 534");
+
+    //     uint256[] memory arr2 = new uint256[](0);
+    //     uint256 x2 = sumArray.sumArray(arr2);
+    //     assertEq(x2, 0, "expected empty array to return 0");
+    // }
 
     /// @notice Test that a non-matching selector reverts
     function testNonMatchingSelector(bytes32 callData) public {
