@@ -1,0 +1,78 @@
+/** 
+ *  BASIC_BANK HUFF EXERCISE
+ *  
+ *  The task is to create a basic bank with huff
+ * functionalities include
+ *      - depositing tokens via similar to how solidity's `receive` function works
+ *      - withdrawing tokens
+ *      - keeping track of and viewing balance
+ */
+
+#define function balanceOf(address) payable returns(uint256)
+#define function withdraw(uint256) payable returns()
+
+#define macro MAIN() = takes(0) returns(0) {
+
+    0x00 calldataload 0xe0 shr
+    dup1 __FUNC_SIG(balanceOf) eq balanceOf jumpi
+    __FUNC_SIG(withdraw) eq withdraw jumpi
+    callvalue iszero not receive jumpi
+
+    revertJump:
+    0x00 0x00 revert
+
+    receive:
+    caller 0x00 mstore
+    0x20 0x00 sha3
+    dup1
+    sload 
+    callvalue
+    add
+    swap1
+    sstore
+    0x01 0x00 mstore
+    0x20 0x00 return
+
+    withdraw:
+    caller 0x00 mstore // get caller address and store in memory
+    0x20 0x00 sha3     // hash the caller address in memory     [hash]
+    dup1                // duplicate the hash   [hash,hash]
+    sload               // load the hash to get the account balance in bank [hash, balance]
+    dup1                // duplicate the account balance    [hash, balance, balance]
+    iszero revertJump jumpi     // check account balance is above 0
+    0x04 calldataload   // get withdraw amount      [hash, balance, withdraw_amount]
+    swap1           // swap withdraw amount and balance     [hash, withdraw_amount, balance]
+    dup2 dup2       // [hash, withdraw_amount, balance, withdraw_amount, balance]
+    eq transfer jumpi     // check if account balance is equal to withdraw amount [hash, withdraw_amount, balance]
+    dup2 dup2       // [hash, withdraw_amount, balance, withdraw_amount, balance]
+    gt iszero revertJump jumpi     // check if account balance is greater than withdraw amount [hash, withdraw_amount, balance]
+    
+    
+    // [hash, withdraw_amount, account_balance]
+    // perform transfer
+    transfer:
+    0x00
+    0x00
+    0x00
+    0x00
+    0x04 calldataload               // msg.value
+    caller                          // address of caller
+    0x04 calldataload               // gas cost    
+    call iszero revertJump jumpi     // check if transfer was successful
+
+    
+    // [hash, withdraw_amount, balance]
+    sub             // subtract withdraw amount from balance [hash, answer]
+    swap1
+    sstore
+    0x01 0x00 mstore
+    0x20 0x00 return
+    
+    balanceOf:
+    0x04 calldataload
+    0x00 mstore
+    0x20 0x00 sha3
+    sload
+    0x00 mstore
+    0x20 0x00 return
+}
