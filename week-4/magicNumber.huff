@@ -1,0 +1,15 @@
+
+// Bytecode: 600a8060093d393df3602a60005260206000f3
+// Init bytecode: 600a8060093d393df3
+// Runtime Bytecode: 602a60005260206000f3
+
+
+#define macro MAIN() = takes(0) returns(0) {
+    // store 42 in memory at offset 0
+    0x2A
+    0x00
+    mstore
+    0x20
+    0x00
+    return
+}
