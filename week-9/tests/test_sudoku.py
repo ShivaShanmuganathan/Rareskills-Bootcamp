@@ -30,6 +30,7 @@ class SudokuVerifierTest(FuzzTest):
 
     def post_sequence(self) -> None:
         wrong_sudoku = sudoku_generator.generate_wrong_sudoku()
+        wrong_sudoku = sudoku_generator.generate_wrong_sudoku_2(self.sudoku)
         # print("Wrong Sudoku:", wrong_sudoku)
         assert self.sudoku_verifier.checkSudoku(wrong_sudoku) == False
 
