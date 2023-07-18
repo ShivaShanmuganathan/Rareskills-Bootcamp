@@ -20,10 +20,6 @@ interface Pair {
     ) external;
 }
 
-// interface Pool {
-//     function approvePairContract(address _pairContract) external;
-// }
-
 contract AMM is Ownable {
     address public tokenA;
     address public tokenB;
@@ -43,11 +39,6 @@ contract AMM is Ownable {
         tokenB = _tokenB;
     }
 
-    // function setPair(address pairAddress) external onlyOwner {
-    //     pair = Pair(pairAddress);
-    //     pair.setPairContract(address(this));
-    // }
-
     function swapExactIn(
         address tokenIn,
         uint256 amountIn,
@@ -65,8 +56,4 @@ contract AMM is Ownable {
     ) external nonReentrant {
         pair.swapExactOut(tokenIn, amountInMax, tokenOut, amountOut);
     }
-
-    // function approvePairContract(address poolAddress) external onlyOwner {
-    //     Pool(poolAddress).approvePairContract(poolAddress);
-    // }
 }
