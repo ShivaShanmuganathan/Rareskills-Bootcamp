@@ -122,4 +122,36 @@ contract AMM is Ownable {
     ) external onlyOwner {
         IERC20(token).approve(receiver, type(uint256).max);
     }
+
+    function getEstimatedTokenOut(
+        address tokenIn,
+        address tokenOut,
+        uint256 amountIn,
+        uint256 pairIdx
+    ) external view returns (uint256) {
+        Pair pair = Pair(pairs[pairIdx]);
+
+        (uint256 reserveIn, uint256 reserveOut, , ) = pair.getReserveInAndOut(
+            tokenIn,
+            tokenOut
+        );
+
+        return pair._getOutputAmount(amountIn, reserveIn, reserveOut);
+    }
+
+    function getEstimatedTokenIn(
+        address tokenIn,
+        address tokenOut,
+        uint256 amountOut,
+        uint256 pairIdx
+    ) external view returns (uint256) {
+        Pair pair = Pair(pairs[pairIdx]);
+
+        (uint256 reserveIn, uint256 reserveOut, , ) = pair.getReserveInAndOut(
+            tokenIn,
+            tokenOut
+        );
+
+        return pair._getInputAmount(amountOut, reserveIn, reserveOut);
+    }
 }
