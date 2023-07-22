@@ -1,7 +1,7 @@
 # Week 11-12: Re-entrancy
 
 Assignments:
-
+![AMM Architecture](./AMM-architecture.png)
 - Write a simple Amm.
     - It can support just **exactIn**, just **exactOut**, or both
     - Fees and liquidity provision are not necessary, just assume that the contract has tokens given to it by charity :-)

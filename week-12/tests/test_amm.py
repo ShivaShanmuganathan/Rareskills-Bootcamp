@@ -86,15 +86,24 @@ def test_counter():
 
     pair1 = Pair.deploy(poolA.address, poolB.address, amm.address, from_=owner)
     pair2 = Pair.deploy(poolB.address, poolC.address, amm.address, from_=owner)
-    
+
     # print("Checking Pair Address")
     # print(pair1.address)
 
-    poolA.approvePairContract(pair1.address, from_=owner)
-    poolB.approvePairContract(pair1.address, from_=owner)
-    poolB.approvePairContract(pair2.address, from_=owner)
-    poolC.approvePairContract(pair2.address, from_=owner)
+    poolA.approveAndAddPairContract(pair1.address, from_=owner)
+    poolB.approveAndAddPairContract(pair1.address, from_=owner)
+    poolB.approveAndAddPairContract(pair2.address, from_=owner)
+    poolC.approveAndAddPairContract(pair2.address, from_=owner)
 
+    amm.setMaxApproval(pair1.address, tokenA.address, from_=owner)
+    amm.setMaxApproval(pair1.address, tokenB.address, from_=owner)
+    amm.setMaxApproval(pair2.address, tokenB.address, from_=owner)
+    amm.setMaxApproval(pair2.address, tokenC.address, from_=owner)
+
+    pair1.setMaxApproval(poolA.address, tokenA.address, from_=owner)
+    pair1.setMaxApproval(poolB.address, tokenB.address, from_=owner)
+    pair2.setMaxApproval(poolB.address, tokenB.address, from_=owner)
+    pair2.setMaxApproval(poolC.address, tokenC.address, from_=owner)
 
     print("Checking Contract Addresses")
     print("amm address: ", amm.address)
@@ -108,6 +117,23 @@ def test_counter():
     print(tokenA.address, ":", poolA.token())
     print(tokenB.address, ":", poolB.token())
     print(tokenC.address, ":", poolC.token())
+
+    print("Set token to pool in AMM")
+    pair1.setTokenToPool(tokenA.address, poolA.address, from_=owner)
+    pair1.setTokenToPool(tokenB.address, poolB.address, from_=owner)
+    pair2.setTokenToPool(tokenB.address, poolB.address, from_=owner)
+    pair2.setTokenToPool(tokenC.address, poolC.address, from_=owner)
+    # amm.setTokenToPool(tokenB.address, poolB.address, from_=owner)
+    # amm.setTokenToPool(tokenC.address, poolC.address, from_=owner)
+
+    # pair1.set
+
+    print("Checking Token to Pool in AMM")
+    print(poolA.address, ":", pair1.tokenToPool(tokenA.address))
+    print(poolB.address, ":", pair1.tokenToPool(tokenB.address))
+    print(poolB.address, ":", pair2.tokenToPool(tokenB.address))
+    print(poolC.address, ":", pair2.tokenToPool(tokenC.address))
+    # print(tokenC.address, ":", amm.tokenToPool(tokenC.address))
 
     print("Adding Pairs to AMM")
     amm.addPair(pair1.address, from_=owner)
@@ -125,14 +151,41 @@ def test_counter():
 
     print("Checking AMM Swaps")
     print("Swapping 10 TokenA for TokenB")
-    tokenA.approve(pair1.address, 10 * 10**18, from_=user1)
+    tokenA.approve(amm.address, 10 * 10**18, from_=user1)
     print("User 1 tokenA balance: ", tokenA.balanceOf(user1))
     print("User 1 tokenB balance: ", tokenB.balanceOf(user1))
-    print("Pair 1 tokenA balance: ", tokenA.balanceOf(pair1))
-    print("Pair 1 tokenB balance: ", tokenB.balanceOf(pair1))
+    print("PoolA tokenA balance: ", tokenA.balanceOf(poolA))
+    print("PoolB tokenB balance: ", tokenB.balanceOf(poolB))
+    print("Checking Pair Balance: " + str(tokenA.balanceOf(pair1.address)))
+    print("Checking Pair Balance TokenB: " + str(tokenB.balanceOf(pair1.address)))
 
-    amm.swapExactIn(poolA.address, 10 * 10**18, poolB.address, 0, from_=user1)
+    tx = amm.swapExactIn(tokenA.address, 10 * 10**18, tokenB.address, 0, from_=user1)
+    print(tx.console_logs)
+
+    print("Checking AMM After Swap")
     print("User 1 tokenA balance: ", tokenA.balanceOf(user1))
     print("User 1 tokenB balance: ", tokenB.balanceOf(user1))
-    print("Pair 1 tokenA balance: ", tokenA.balanceOf(pair1))
-    print("Pair 1 tokenB balance: ", tokenB.balanceOf(pair1))
+    print("poolA tokenA balance: ", tokenA.balanceOf(poolA))
+    print("poolB tokenB balance: ", tokenB.balanceOf(poolB))
+    print("Checking Pair Balance: " + str(tokenA.balanceOf(pair1.address)))
+    print("Checking Pair Balance TokenB: " + str(tokenB.balanceOf(pair1.address)))
+    print("Checking Pool Balance: " + str(tokenA.balanceOf(poolA.address)))
+    print("Checking Reserve Balance: " + str(poolA.getReserve()))
+    print()
+
+    print("Checking another swap")
+    print("User 1 tokenB balance: ", tokenB.balanceOf(user1))
+    print("User 1 tokenC balance: ", tokenC.balanceOf(user1))
+    print("poolB tokenB balance: ", tokenB.balanceOf(poolB))
+    print("poolC tokenB balance: ", tokenB.balanceOf(poolC))
+
+    tokenB.approve(amm.address, 10 * 10**18, from_=user1)
+
+    tx2 = amm.swapExactOut(tokenB.address, tokenC.address, 5 * 10**18, 1, from_=user1)
+    print(tx2.console_logs)
+
+    print("After Swap")
+    print("User 1 tokenB balance: ", tokenB.balanceOf(user1))
+    print("User 1 tokenC balance: ", tokenC.balanceOf(user1))
+    print("poolB tokenB balance: ", tokenB.balanceOf(poolB))
+    print("poolC tokenB balance: ", tokenC.balanceOf(poolC))

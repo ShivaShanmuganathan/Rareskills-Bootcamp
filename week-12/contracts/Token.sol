@@ -32,6 +32,4 @@ contract Token is ERC20, Ownable {
         emit Log("Token Transfer", success);
         return status;
     }
-
-    // function mint
 }
