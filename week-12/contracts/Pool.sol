@@ -7,7 +7,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 contract Pool is Ownable {
     IERC20 public token;
     uint256 private reserve;
-
     address public pairContract;
     uint256 public constant maxApprovalAmount = type(uint256).max;
 
@@ -18,11 +17,13 @@ contract Pool is Ownable {
         token = IERC20(_token);
     }
 
+
+
     function approvePairContract(address _pairContract) external onlyOwner {
         require(_pairContract != address(0), "Pair contract address not set");
-
+        pairContract = _pairContract;
         require(
-            token.approve(pairContract, maxApprovalAmount),
+            token.approve(_pairContract, maxApprovalAmount),
             "Approval failed"
         );
     }

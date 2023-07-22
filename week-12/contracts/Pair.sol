@@ -3,6 +3,7 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "hardhat/console.sol";
 
 interface Pool {
     function getReserve() external returns (uint256);
@@ -35,7 +36,7 @@ contract Pair is Ownable {
         uint256 inputAmount,
         uint256 inputReserve,
         uint256 outputReserve
-    ) private pure returns (uint256) {
+    ) public pure returns (uint256) {
         require(inputAmount > 0, "Input amount must be greater than 0");
         require(inputReserve > 0 && outputReserve > 0, "Invalid reserves");
 
@@ -55,7 +56,7 @@ contract Pair is Ownable {
         uint256 outputAmount,
         uint256 inputReserve,
         uint256 outputReserve
-    ) private pure returns (uint256) {
+    ) public pure returns (uint256) {
         require(outputAmount > 0, "Output amount must be greater than 0");
         require(inputReserve > 0 && outputReserve > 0, "Invalid reserves");
 
@@ -97,6 +98,7 @@ contract Pair is Ownable {
         amountOut = _getOutputAmount(amountIn, reserveIn, reserveOut);
 
         Pool(poolA).deposit(amountIn);
+        
         Pool(poolB).withdraw(amountOut);
     }
 

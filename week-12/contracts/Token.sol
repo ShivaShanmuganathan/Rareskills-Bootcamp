@@ -13,6 +13,10 @@ contract Token is ERC20, Ownable {
 
     constructor() ERC20("Token", "TK") {}
 
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+
     function transferFrom(
         address sender,
         address recipient,
@@ -28,5 +32,6 @@ contract Token is ERC20, Ownable {
         emit Log("Token Transfer", success);
         return status;
     }
-}
 
+    // function mint
+}

@@ -8,22 +8,18 @@ interface Pair {
     function swapExactIn(
         address tokenIn,
         uint256 amountIn,
-        address tokenOut,
-        uint256 amountOutMin
+        address tokenOut
     ) external;
 
     function swapExactOut(
         address tokenIn,
-        uint256 amountInMax,
         address tokenOut,
         uint256 amountOut
     ) external;
 }
 
 contract AMM is Ownable {
-    address public tokenA;
-    address public tokenB;
-    Pair public pair;
+    address[] public pairs;
 
     bool private isSwapping;
 
@@ -34,26 +30,29 @@ contract AMM is Ownable {
         isSwapping = false;
     }
 
-    constructor(address _tokenA, address _tokenB) {
-        tokenA = _tokenA;
-        tokenB = _tokenB;
-    }
+    // constructor(address _tokenA, address _tokenB, to) {}
 
     function swapExactIn(
         address tokenIn,
         uint256 amountIn,
         address tokenOut,
-        uint256 amountOutMin
+        uint256 pairIdx
     ) external nonReentrant {
-        pair.swapExactIn(tokenIn, amountIn, tokenOut, amountOutMin);
+        Pair pair = Pair(pairs[pairIdx]);
+        pair.swapExactIn(tokenIn, amountIn, tokenOut);
     }
 
     function swapExactOut(
         address tokenIn,
-        uint256 amountInMax,
         address tokenOut,
-        uint256 amountOut
+        uint256 amountOut,
+        uint256 pairIdx
     ) external nonReentrant {
-        pair.swapExactOut(tokenIn, amountInMax, tokenOut, amountOut);
+        Pair pair = Pair(pairs[pairIdx]);
+        pair.swapExactOut(tokenIn, tokenOut, amountOut);
+    }
+
+    function addPair(address pairAddress) external onlyOwner {
+        pairs.push(pairAddress);
     }
 }
