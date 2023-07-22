@@ -46,10 +46,7 @@ contract Pair is Ownable {
         require(inputReserve > 0 && outputReserve > 0, "Invalid reserves");
 
         // The constant product formula: inputReserve * outputReserve = (inputReserve - x) * (outputReserve + y)
-
-        // inputReserve * outputReserve = (inputReserve - x) * (outputReserve + y)
         // x = inputReserve - (inputReserve * outputReserve) / (outputReserve + y)
-        // where 'x' is the input amount and 'y' is the output amount
 
         // Rearranging the formula to solve for 'y'
         uint256 outputAmount = inputReserve -
@@ -68,10 +65,6 @@ contract Pair is Ownable {
     ) public pure returns (uint256) {
         require(outputAmount > 0, "Output amount must be greater than 0");
         require(inputReserve > 0 && outputReserve > 0, "Invalid reserves");
-
-        // The constant product formula: inputReserve * outputReserve = (inputReserve - x) * (outputReserve + y)
-        // where 'x' is the input amount and 'y' is the output amount
-
         // inputReserve * outputReserve = (inputReserve - x) * (outputReserve + y)
         // y = (inputReserve * outputReserve) / (inputReserve - x) - outputReserve
 

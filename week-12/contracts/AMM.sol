@@ -68,7 +68,6 @@ contract AMM is Ownable {
         address tokenOut,
         uint256 pairIdx
     ) external nonReentrant {
-        console.log("Check amountIn", amountIn);
         require(
             IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn),
             "Token transfer failed"
@@ -76,11 +75,6 @@ contract AMM is Ownable {
         Pair pair = Pair(pairs[pairIdx]);
 
         uint256 amountOut = pair.swapExactIn(tokenIn, amountIn, tokenOut);
-        console.log(
-            "Contract balance of tokenOut",
-            IERC20(tokenOut).balanceOf(address(this))
-        );
-        console.log("Check amountOut", amountOut);
         require(
             IERC20(tokenOut).transfer(msg.sender, amountOut),
             "Token transfer failed"
@@ -112,12 +106,6 @@ contract AMM is Ownable {
         );
 
         uint256 amountOutMin = pair.swapExactOut(tokenIn, tokenOut, amountOut);
-        console.log(
-            "Contract balance of tokenOut",
-            IERC20(tokenOut).balanceOf(address(this))
-        );
-        console.log("Check amountIn", amountIn);
-        console.log("Check amountOutMin", amountOutMin);
         require(
             IERC20(tokenOut).transfer(msg.sender, amountOutMin),
             "Token transfer failed"
