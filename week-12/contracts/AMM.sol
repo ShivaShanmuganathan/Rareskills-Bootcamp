@@ -67,7 +67,7 @@ contract AMM is Ownable {
         uint256 amountIn,
         address tokenOut,
         uint256 pairIdx
-    ) external nonReentrant {
+    ) external {
         require(
             IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn),
             "Token transfer failed"
@@ -86,7 +86,7 @@ contract AMM is Ownable {
         address tokenOut,
         uint256 amountOut,
         uint256 pairIdx
-    ) external nonReentrant {
+    ) external {
         Pair pair = Pair(pairs[pairIdx]);
 
         (uint256 reserveIn, uint256 reserveOut, , ) = pair.getReserveInAndOut(

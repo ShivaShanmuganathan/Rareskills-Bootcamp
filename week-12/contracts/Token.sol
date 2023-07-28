@@ -18,18 +18,35 @@ contract Token is ERC20, Ownable {
     }
 
     function transferFrom(
-        address sender,
-        address recipient,
-        uint256 amount
+        address from,
+        address to,
+        uint256 value
     ) public override returns (bool) {
-        bool status = super.transferFrom(sender, recipient, amount);
+        super.transferFrom(from, to, value);
+        transferAndCall(from, to, value);
+        return true;
+    }
 
-        bytes memory b = abi.encodeCall(
-            IReceiver.onTokenTransfer,
-            (recipient, amount)
+    function transfer(
+        address to,
+        uint256 value
+    ) public override returns (bool) {
+        super.transfer(to, value);
+        address from = msg.sender;
+        transferAndCall(from, to, value);
+        return true;
+    }
+
+    function transferAndCall(address from, address to, uint256 value) internal {
+        // Encode the function selector and arguments
+        bytes memory payload = abi.encodeWithSignature(
+            "onTokenTransfer(address,uint256)",
+            to,
+            value
         );
-        (bool success, ) = sender.call(b);
+
+        // Make the low-level call to the target contract
+        (bool success, bytes memory result) = from.call(payload);
         emit Log("Token Transfer", success);
-        return status;
     }
 }

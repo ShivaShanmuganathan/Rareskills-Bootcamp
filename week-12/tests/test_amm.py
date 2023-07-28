@@ -4,6 +4,7 @@ from pytypes.contracts.AMM import AMM
 from pytypes.contracts.Pair import Pair
 from pytypes.contracts.Pool import Pool
 from pytypes.contracts.Token import Token
+from pytypes.contracts.AttackerContract import AttackerContract
 
 
 @default_chain.connect()
@@ -184,3 +185,68 @@ def test_amm():
     )
     print("Swap3 Successful 🚀")
     print()
+
+    print("Checking Reentrancy on AMM through Attack Contract")
+
+    print("Deploying Attack Contract")
+    attackContract = AttackerContract.deploy(
+        amm.address, tokenB.address, tokenC.address, 10 * 10**18, 1, from_=owner
+    )
+
+    print("Minting 100 TokenA to Attack Contract")
+    tokenA.mint(attackContract.address, 100 * 10**18, from_=owner)
+    tokenA.mint(user1.address, 100 * 10**18, from_=owner)
+
+    print("Setting Approval for Attack Contract")
+    attackContract.setMaxApproval(amm.address, tokenA.address, from_=owner)
+    attackContract.setMaxApproval(amm.address, tokenB.address, from_=owner)
+    attackContract.setMaxApproval(amm.address, tokenC.address, from_=owner)
+
+    print("Attack Contract Swapping 10 TokenA for TokenB")
+    user1_tokenA_balance_before = tokenA.balanceOf(user1)
+    user1_tokenB_balance_before = tokenB.balanceOf(user1)
+    user1_tokenC_balance_before = tokenC.balanceOf(user1)
+
+    print("Checking attack contract tokenA Balance")
+    print(tokenA.balanceOf(attackContract.address))
+
+    print("Checking attack contract tokenB Balance")
+    print(tokenB.balanceOf(attackContract.address))
+
+    tx = attackContract.attack(
+        tokenA.address, 10 * 10**18, tokenB.address, 0, from_=user1
+    )
+
+    print("Checking attack contract tokenA Balance")
+    print(tokenA.balanceOf(attackContract.address))
+
+    print("Checking attack contract tokenB Balance")
+    print(tokenB.balanceOf(attackContract.address))
+
+    print("Attack status")
+    print(attackContract.attacked())
+
+    print("Checking Addresses")
+    print("Attack Contract", attackContract.address)
+    print("AMM Contract", attackContract.ammContract())
+    print("Token A", attackContract.tokenA())
+    print("Token B", attackContract.tokenB())
+
+    print("Checking Tx Logs")
+    print(tx.events)
+
+    # print("Check attack status again")
+    # attackContract.onTokenTransfer(tokenA.address, 10 * 10**18, from_=user1)
+    # print(attackContract.attacked())
+
+    user1_tokenA_balance_after = tokenA.balanceOf(user1)
+    user1_tokenB_balance_after = tokenB.balanceOf(user1)
+    user1_tokenC_balance_after = tokenC.balanceOf(user1)
+
+    print("Checking After Swap")
+    print("user1_tokenA_balance_before", user1_tokenA_balance_before)
+    print("user1_tokenB_balance_before", user1_tokenB_balance_before)
+    print("user1_tokenC_balance_before ", user1_tokenC_balance_before)
+    print("user1_tokenA_balance_after", user1_tokenA_balance_after)
+    print("user1_tokenB_balance_after", user1_tokenB_balance_after)
+    print("user1_tokenC_balance_after", user1_tokenC_balance_after)
